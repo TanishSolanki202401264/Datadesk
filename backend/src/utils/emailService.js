@@ -1,0 +1,123 @@
+'use strict';
+
+const nodemailer = require('nodemailer');
+const dns = require('dns');
+// Render containers often lack outbound IPv6 routing. 
+// Force Node.js to prioritize IPv4 when resolving smtp.gmail.com
+if (dns.setDefaultResultOrder) {
+  dns.setDefaultResultOrder('ipv4first');
+}
+
+/**
+ * Creates a transporter using standard SMTP environment variables.
+ * If EMAIL_USER is not set, it will log the code to the console instead (useful for local dev).
+ */
+let transporterInstance = null;
+
+function getTransporter() {
+  if (transporterInstance) return transporterInstance;
+  if (!process.env.EMAIL_USER) return null;
+
+  // Render often throttles or inspects port 587 (STARTTLS).
+  // Port 465 (Implicit SSL) is significantly more reliable and faster for Gmail on cloud hosts.
+  const isGmail = (process.env.EMAIL_HOST || '').includes('gmail');
+
+  transporterInstance = nodemailer.createTransport({
+    host: process.env.EMAIL_HOST || 'smtp.gmail.com',
+    port: isGmail ? 465 : (process.env.EMAIL_PORT || 465),
+    secure: isGmail ? true : (process.env.EMAIL_SECURE === 'true'),
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS,
+    },
+    connectionTimeout: 10000, // 10 seconds max to connect
+    greetingTimeout: 5000,    // 5 seconds max for greeting
+    socketTimeout: 10000,     // 10 seconds max for socket inactivity
+    pool: true,               // Use pooled connections for better reliability
+    maxConnections: 3,
+  });
+  return transporterInstance;
+}
+
+/**
+ * Send an email with a 6-digit verification code.
+ */
+async function sendVerificationEmail(toEmail, code) {
+  const transporter = getTransporter();
+  
+  const subject = 'Verify your DataDesk account';
+  const text = `Welcome to DataDesk!\n\nYour 6-digit verification code is: ${code}\n\nThis code will expire in 15 minutes.`;
+  const html = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <h2>Welcome to DataDesk!</h2>
+      <p>Thank you for registering. Please use the following 6-digit code to verify your account:</p>
+      <div style="background: #f4f4f5; padding: 20px; border-radius: 8px; text-align: center; margin: 20px 0;">
+        <h1 style="letter-spacing: 5px; margin: 0; color: #2563eb;">${code}</h1>
+      </div>
+      <p style="color: #71717a; font-size: 14px;">This code will expire in 15 minutes. If you did not request this, please ignore this email.</p>
+    </div>
+  `;
+
+  if (!transporter) {
+    console.log(`\n\n[Email Service (DEV MODE)]\nSubject: ${subject}\nTo: ${toEmail}\nCode: ${code}\n\n`);
+    return true; // Pretend it sent for local dev testing
+  }
+
+  try {
+    await transporter.sendMail({
+      from: `"DataDesk" <${process.env.EMAIL_USER}>`,
+      to: toEmail,
+      subject,
+      text,
+      html,
+    });
+    return { success: true };
+  } catch (error) {
+    console.error('Error sending verification email:', error);
+    return { success: false, error: error.message || String(error) };
+  }
+}
+
+/**
+ * Send a password reset email with a 6-digit code.
+ */
+async function sendPasswordResetEmail(toEmail, code) {
+  const transporter = getTransporter();
+  
+  const subject = 'Reset your DataDesk password';
+  const text = `You requested a password reset.\n\nYour 6-digit reset code is: ${code}\n\nThis code will expire in 15 minutes.`;
+  const html = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <h2>Password Reset Request</h2>
+      <p>We received a request to reset your password. Use the following 6-digit code to reset it:</p>
+      <div style="background: #f4f4f5; padding: 20px; border-radius: 8px; text-align: center; margin: 20px 0;">
+        <h1 style="letter-spacing: 5px; margin: 0; color: #dc2626;">${code}</h1>
+      </div>
+      <p style="color: #71717a; font-size: 14px;">This code will expire in 15 minutes. If you did not request a password reset, you can safely ignore this email.</p>
+    </div>
+  `;
+
+  if (!transporter) {
+    console.log(`\n\n[Email Service (DEV MODE)]\nSubject: ${subject}\nTo: ${toEmail}\nCode: ${code}\n\n`);
+    return true;
+  }
+
+  try {
+    await transporter.sendMail({
+      from: `"DataDesk Support" <${process.env.EMAIL_USER}>`,
+      to: toEmail,
+      subject,
+      text,
+      html,
+    });
+    return { success: true };
+  } catch (error) {
+    console.error('Error sending password reset email:', error);
+    return { success: false, error: error.message || String(error) };
+  }
+}
+
+module.exports = {
+  sendVerificationEmail,
+  sendPasswordResetEmail,
+};

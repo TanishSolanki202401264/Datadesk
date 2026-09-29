@@ -1,0 +1,126 @@
+import React, { useState } from 'react';
+import { TableCell } from '@/features/visualizers/NullVisualizer';
+
+const getGroupConstituents = async (executeQuery, sql, groupByCols, rowData, allColumns) => {
+  if (!sql || typeof sql !== 'string') return null;
+  // Find the base FROM and WHERE clauses
+  const fromMatch = sql.match(/FROM\s+([\s\S]+?)(?:GROUP BY|ORDER BY|LIMIT|$)/i);
+  if (!fromMatch) return null;
+  
+  const baseFromWhere = fromMatch[1];
+  
+  // Build WHERE conditions for the grouped columns
+  const conditions = [];
+  groupByCols.forEach((colName) => {
+    const colIndex = allColumns.indexOf(colName);
+    if (colIndex !== -1) {
+      const val = rowData[colIndex];
+      if (val === null) {
+        conditions.push(`${colName} IS NULL`);
+      } else if (typeof val === 'string') {
+        conditions.push(`${colName} = '${val.replace(/'/g, "''")}'`);
+      } else {
+        conditions.push(`${colName} = ${val}`);
+      }
+    }
+  });
+
+  const conditionString = conditions.length > 0 ? (baseFromWhere.toUpperCase().includes('WHERE') ? ' AND ' : ' WHERE ') + conditions.join(' AND ') : '';
+  
+  const query = `SELECT * FROM ${baseFromWhere}${conditionString} LIMIT 50`;
+  
+  try {
+    const res = await executeQuery(query);
+    if (res.rows && res.rows.length > 0) {
+      return { columns: res.columns, values: res.rows };
+    }
+    return null;
+  } catch (err) {
+    console.error("Constituent fetch failed:", err);
+    return null;
+  }
+};
+
+const extractGroupByColumns = (sql) => {
+  if (!sql || typeof sql !== 'string') return [];
+  const match = sql.match(/GROUP\s+BY\s+([a-zA-Z0-9_,\s]+)(?:HAVING|ORDER BY|LIMIT|$)/i);
+  if (match) {
+    return match[1].split(',').map(s => s.trim());
+  }
+  return [];
+};
+
+export const GroupedResultRow = React.memo(React.forwardRef(function GroupedResultRow({ row, sql, executeQuery, columns, ...props }, ref) {
+  const [expanded, setExpanded] = useState(false);
+  const [constituents, setConstituents] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  const groupByCols = extractGroupByColumns(sql);
+  const hasGroupBy = groupByCols.length > 0;
+
+  const handleExpand = async () => {
+    if (!hasGroupBy) return;
+    
+    if (!expanded) {
+      setLoading(true);
+      const data = await getGroupConstituents(executeQuery, sql, groupByCols, row, columns);
+      setConstituents(data);
+      setLoading(false);
+    }
+    setExpanded(!expanded);
+  };
+
+  if (!hasGroupBy) {
+    return (
+      <tr ref={ref} {...props}>
+        {row.map((cell, ci) => <td key={ci}><TableCell value={cell} /></td>)}
+      </tr>
+    );
+  }
+
+  return (
+    <>
+      <tr ref={ref} {...props} onClick={handleExpand} className={`cursor-pointer ${expanded ? 'bg-surface-2' : 'bg-transparent'} ${props.className || ''}`} style={props.style} title="Click to see rows in this group">
+        <td className="w-[30px] text-center text-primary font-bold">
+          {expanded ? '▼' : '▶'}
+        </td>
+        {row.map((cell, ci) => <td key={ci}><TableCell value={cell} /></td>)}
+      </tr>
+      
+      {expanded && (
+        <tr className="constituent-row">
+          <td colSpan={columns.length + 1} className="p-0 bg-bg">
+            <div className="py-3 pr-3 pl-[42px] border-b border-border">
+              <div className="text-[11px] font-semibold text-text-secondary mb-2 uppercase">
+                ↳ Constituent Rows ({constituents?.values?.length || 0})
+              </div>
+              
+              {loading ? (
+                <div className="text-muted text-xs">Loading constituent rows...</div>
+              ) : constituents ? (
+                <div className="overflow-x-auto">
+                  <table className="results-table m-0 opacity-90">
+                    <thead>
+                      <tr>
+                        {constituents.columns.map((col, i) => <th key={i}>{col}</th>)}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {constituents.values.map((cRow, ri) => (
+                        <tr key={ri}>
+                          {cRow.map((cell, ci) => <td key={ci}><TableCell value={cell} /></td>)}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div className="text-error text-xs">Could not fetch constituent rows.</div>
+              )}
+            </div>
+          </td>
+        </tr>
+      )}
+    </>
+  );
+}));

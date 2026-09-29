@@ -1,0 +1,17 @@
+{
+  "env": {
+    "browser": true,
+    "es2024": true,
+    "node": true,
+    "worker": true
+  },
+  "globals": {
+    "React": "readonly",
+    "JSX": "readonly",
+    "import": "readonly",
+    "importScripts": "readonly"
+  },
+  "rules": {
+    "no-undef": "error"
+  }
+}

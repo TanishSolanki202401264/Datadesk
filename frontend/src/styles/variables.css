@@ -1,0 +1,192 @@
+/* ================================================================
+   Enterprise DataDesk — Global Architecture Variables
+   Design System Tokens (Apple, Stripe, Vercel inspired)
+   ================================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+:root {
+  /* ── Core Colors: Alabaster Light Theme ── */
+  --bg:              #f7f7f8;
+  --bg-2:            #f1f1f2;
+  --surface:         #ffffff;
+  --surface-2:       #fcfcfd;
+  --surface-3:       #f9f9fb;
+  --border:          #e5e7eb;
+  --border-hover:    #d1d5db;
+  --ring:            rgba(0, 0, 0, 0.2);
+
+  --text:            #111827;
+  --text-secondary:  #4b5563;
+  --muted:           #6b7280;
+
+  --primary:         #000000;
+  --primary-foreground: #ffffff;
+  --primary-hover:   #333333;
+  --primary-muted:   rgba(0, 0, 0, 0.05);
+  --primary-light:   rgba(0, 0, 0, 0.1);
+
+  --success:         #059669;
+  --success-muted:   rgba(5, 150, 105, 0.1);
+  --warning:         #d97706;
+  --warning-muted:   rgba(217, 119, 6, 0.1);
+  --error:           #dc2626;
+  --error-muted:     rgba(220, 38, 38, 0.1);
+
+  --accent-1:        #8b5cf6;  
+  --accent-2:        #ec4899;  
+  --accent-3:        #3b82f6;  
+
+  /* ── Elevations & Shadows (Vercel/Stripe scale) ── */
+  --shadow-sm:       0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md:       0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  --shadow-lg:       0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.03);
+  --shadow-float:    0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
+  
+  --glass-bg:        rgba(255, 255, 255, 0.85);
+  --glass-border:    rgba(255, 255, 255, 0.4);
+
+  --gradient-primary: linear-gradient(135deg, #000000 0%, #333333 100%);
+  --gradient-accent:  linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%);
+
+  /* ── Typography ── */
+  --font-sans:   'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono:   'JetBrains Mono', 'Fira Code', Consolas, monospace;
+
+  /* ── Sizing (Radius) ── */
+  --radius-sm:   4px;
+  --radius:      8px;
+  --radius-lg:   12px;
+  --radius-xl:   16px;
+  --radius-pill: 9999px;
+
+  /* ── Hardware Accelerated Transitions ── */
+  --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  --ease-out:    cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-fast: 150ms var(--ease-out);
+  --transition:      250ms var(--ease-out);
+  --transition-slow: 400ms var(--ease-out);
+}
+
+html[data-theme="dark"],
+[data-theme="dark"] {
+  /* ── Core Colors: Onyx Dark Theme ── */
+  --bg:              #0a0a0a;
+  --bg-2:            #121212;
+  --surface:         #171717;
+  --surface-2:       #1e1e1e;
+  --surface-3:       #262626;
+  --border:          #2e2e2e;
+  --border-hover:    #404040;
+  --ring:            rgba(255, 255, 255, 0.2);
+
+  --text:            #f5f5f5;
+  --text-secondary:  #a3a3a3;
+  --muted:           #737373;
+
+  --primary:         #ffffff;
+  --primary-foreground: #000000;
+  --primary-hover:   #e5e5e5;
+  --primary-muted:   rgba(255, 255, 255, 0.08);
+  --primary-light:   rgba(255, 255, 255, 0.15);
+
+  --success:         #10b981;
+  --success-muted:   rgba(16, 185, 129, 0.15);
+  --warning:         #f59e0b;
+  --warning-muted:   rgba(245, 158, 11, 0.15);
+  --error:           #ef4444;
+  --error-muted:     rgba(239, 68, 68, 0.15);
+
+  --accent-1:        #a78bfa;
+  --accent-2:        #f472b6;
+  --accent-3:        #60a5fa;
+
+  /* Elevations & Shadows (Darker, tighter for dark mode) */
+  --shadow-sm:       0 1px 2px rgba(0, 0, 0, 0.5);
+  --shadow-md:       0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
+  --shadow-lg:       0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.4);
+  --shadow-float:    0 20px 25px -5px rgba(0, 0, 0, 0.6), 0 10px 10px -5px rgba(0, 0, 0, 0.4);
+  
+  --glass-bg:        rgba(23, 23, 23, 0.75);
+  --glass-border:    rgba(255, 255, 255, 0.05);
+
+  --gradient-primary: linear-gradient(135deg, #ffffff 0%, #d4d4d4 100%);
+}
+
+/* ── Z-Index Scale ──────────────────────────────────────────────────────── */
+:root {
+  --z-base:      1;
+  --z-dropdown:  100;
+  --z-sticky:    200;
+  --z-overlay:   500;
+  --z-modal:     1000;
+  --z-popover:   2000;
+  --z-toast:     9000;
+  --z-blocker:   9999;
+}
+
+/* ── Animation & Transition Token Scale ─────────────────────────────────── */
+:root {
+  --duration-instant:  50ms;
+  --duration-fast:     150ms;
+  --duration-base:     250ms;
+  --duration-slow:     400ms;
+  --duration-toast:    4500ms;
+  --duration-toast-leave: 350ms;
+}
+
+/* ── Reset & Globals ── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body, #root {
+  height: 100%;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background-color var(--transition), color var(--transition);
+  will-change: background-color;
+}
+
+/* ── Global Animations ── */
+@keyframes smoothFadeIn {
+  from { opacity: 0; transform: translateY(8px) scale(0.99); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.page-enter {
+  animation: smoothFadeIn 0.5s var(--ease-out) forwards;
+}
+
+/* ── Active States ── */
+button, .btn, .nav-btn, a {
+  transition: transform var(--transition-fast), opacity var(--transition-fast), background-color var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
+  will-change: transform;
+}
+button:active:not(:disabled), 
+.btn:active:not(:disabled) {
+  transform: scale(0.97) !important;
+}
+
+/* ── Typography ── */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--text);
+  letter-spacing: -0.02em;
+}
+
+a { color: var(--text); text-decoration: none; transition: opacity var(--transition-fast); }
+a:hover { opacity: 0.8; }
+
+/* ── Scrollbars (Stripe-like thin) ── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; border: 1px solid transparent; background-clip: padding-box; }
+::-webkit-scrollbar-thumb:hover { background: var(--muted); border: 1px solid transparent; background-clip: padding-box; }
